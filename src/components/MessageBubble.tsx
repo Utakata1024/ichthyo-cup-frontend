@@ -1,14 +1,14 @@
 import React from "react";
 
-export interface Message {
+export type Message = {
     id: number;
     text: string;
     sender: "user" | "ai";
-}
+};
 
-interface MessageBubbleProps {
+type MessageBubbleProps = {
     message: Message;
-}
+};
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({message}) => {
     const isUser = message.sender === "user";

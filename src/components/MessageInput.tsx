@@ -1,9 +1,9 @@
 import React, {useState, useRef, useEffect, KeyboardEvent} from "react";
 
-interface MessageInputProps {
+type MessageInputProps = {
     onSendMessage: (text: string) => void;
     isLoading: boolean;
-}
+};
 
 const MessageInput: React.FC<MessageInputProps> = ({
     onSendMessage,

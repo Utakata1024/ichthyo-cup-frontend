@@ -1,7 +1,7 @@
 import React, {forwardRef} from "react";
 import MessageBubble, {Message} from "./MessageBubble";
 
-interface ChatWindowProps {
+type ChatWindowProps = {
     messages: Message[];
     isLoading: boolean;
 }
