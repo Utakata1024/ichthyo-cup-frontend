@@ -15,7 +15,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({message}) => {
 
     // senderによってスタイルを動的に変更
     const bubbleClasses = isUser
-        ? "bg-purple-600 text-white self-end" // ユーザーのメッセージは右寄せ
+        ? "bg-violet-600 text-white self-end" // ユーザーのメッセージは右寄せ
         : "bg-gray-200 text-gray-800 self-start"; // AIのメッセージは左寄せ
 
     return (
