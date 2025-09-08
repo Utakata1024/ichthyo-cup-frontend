@@ -1,9 +1,9 @@
 "use client";
 
 import React, {useState, useRef, useEffect} from "react";
-import ChatWindow from "../../components/ChatWindow";
-import MessageInput from "../../components/MessageInput";
-import {Message} from "../../components/MessageBubble";
+import ChatWindow from "@/components/ChatWindow";
+import MessageInput from "@/components/MessageInput";
+import {Message} from "@/components/MessageBubble";
 
 export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
