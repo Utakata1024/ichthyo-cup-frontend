@@ -42,9 +42,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="メッセージを入力..."
+                placeholder="メッセージを入力"
                 rows={1}
-                className="flex-1 p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-lime-400 transition max-h-40"
+                className="flex-1 p-2 border border-gray-300 text-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-lime-400 transition max-h-40"
                 disabled={isLoading}
             />
             <button
