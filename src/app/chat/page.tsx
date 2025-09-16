@@ -5,12 +5,43 @@ import ChatWindow from "@/components/ChatWindow";
 import MessageInput from "@/components/MessageInput";
 import {Message} from "@/components/MessageBubble";
 
+const CHAT_MESSAGES_KEY = "chatMessages";
+
 export default function Home() {
+    // 初期化時にlocalStorageからメッセージを読み込む
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const isInitialMount = useRef(true);
 
     useEffect(() => {
+        try {
+            const savedMessages = localStorage.getItem(CHAT_MESSAGES_KEY);
+            if (savedMessages) {
+                setMessages(JSON.parse(savedMessages));
+            }
+        } catch (error) {
+            console.error(
+                "localStorageからのメッセージの読み込みに失敗しました:",
+                error,
+            );
+        }
+    },[]);
+
+    useEffect(() => {
+        // マウントが完了していない、またはmessagesが初期状態のままであれば何もしない
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        try {
+            localStorage.setItem(CHAT_MESSAGES_KEY, JSON.stringify(messages));
+        } catch (error) {
+            console.error(
+                "localStorageへのメッセージの保存に失敗しました:",
+                error,
+            );
+        }
         if (chatContainerRef.current) {
             const {scrollHeight, clientHeight} = chatContainerRef.current;
             chatContainerRef.current.scrollTo({
@@ -27,13 +58,16 @@ export default function Home() {
 
         try {
             // APIリクエストを送信
-            const response = await fetch("http://localhost:3000/api/tool/search-track", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                "http://localhost:3000/api/tool/search-track",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({query: text}),
                 },
-                body: JSON.stringify({query: text}),
-            });
+            );
             console.log("API Response:", response);
 
             if (!response.ok) {
