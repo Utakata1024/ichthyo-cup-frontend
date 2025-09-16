@@ -8,10 +8,11 @@ import {Message} from "@/components/MessageBubble";
 const CHAT_MESSAGES_KEY = "chatMessages";
 
 export default function Home() {
-    // 初期化時にlocalStorageからメッセージを読み込む
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    
+    // 初期化時にlocalStorageからメッセージを読み込む
     const isInitialMount = useRef(true);
 
     useEffect(() => {
@@ -26,7 +27,7 @@ export default function Home() {
                 error,
             );
         }
-    },[]);
+    }, []);
 
     useEffect(() => {
         // マウントが完了していない、またはmessagesが初期状態のままであれば何もしない
@@ -51,8 +52,33 @@ export default function Home() {
         }
     }, [messages]);
 
+    useEffect(() => {
+        const element = chatContainerRef.current;
+        if (!element) return;
+
+        const scrollToBottom = () => {
+            element.scrollTop = element.scrollHeight;
+        };
+
+        const lastMessage = messages[messages.length - 1];
+        const isAnimating =
+            lastMessage?.sender === "ai" && lastMessage.isAnimation;
+
+        if (isAnimating) {
+            const intervalId = setInterval(scrollToBottom, 100);
+            return () => clearInterval(intervalId);
+        } else {
+            element.scrollTo({top: element.scrollHeight, behavior: "smooth"});
+        }
+    }, [messages, isLoading]);
+
     const handleSendMessage = async (text: string) => {
-        const userMessage: Message = {id: Date.now(), text, sender: "user"};
+        const userMessage: Message = {
+            id: Date.now(),
+            text,
+            sender: "user",
+            isAnimation: false,
+        };
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
@@ -75,11 +101,13 @@ export default function Home() {
             }
 
             const data = await response.json();
+            console.log(data);
 
             const aiMessage: Message = {
                 id: Date.now() + 1,
                 text: data.content[0].text,
                 sender: "ai",
+                isAnimation: true,
             };
             setMessages((prev) => [...prev, aiMessage]);
         } catch (error) {
@@ -88,6 +116,7 @@ export default function Home() {
                 id: Date.now() + 1,
                 text: "エラーが発生しました。もう一度お試しください。",
                 sender: "ai",
+                isAnimation: false,
             };
             setMessages((prev) => [...prev, errorMessage]);
         } finally {
@@ -98,13 +127,14 @@ export default function Home() {
     return (
         <div className="flex flex-col h-screen bg-gray-50 max-w-4xl mx-auto border-x border-gray-200">
             <header className="p-4 bg-violet-800 border-b border-gray-200 shadow-sm text-center">
-                <h1 className="text-xl font-bold text-gray-200">MusiChat</h1>
+                <h1 className="text-2xl font-bold text-gray-200">MusiChat</h1>
             </header>
             <main className="flex-1 flex flex-col overflow-hidden">
                 <ChatWindow
                     ref={chatContainerRef}
                     messages={messages}
                     isLoading={isLoading}
+                    setMessages={setMessages}
                 />
             </main>
             <MessageInput
