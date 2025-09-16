@@ -98,7 +98,7 @@ export default function Home() {
     return (
         <div className="flex flex-col h-screen bg-gray-50 max-w-4xl mx-auto border-x border-gray-200">
             <header className="p-4 bg-violet-800 border-b border-gray-200 shadow-sm text-center">
-                <h1 className="text-xl font-bold text-gray-200">AIチャット</h1>
+                <h1 className="text-xl font-bold text-gray-200">MusiChat</h1>
             </header>
             <main className="flex-1 flex flex-col overflow-hidden">
                 <ChatWindow
