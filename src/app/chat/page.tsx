@@ -20,20 +20,45 @@ export default function Home() {
         }
     }, [messages]);
 
-    const handleSendMessage = (text: string) => {
+    const handleSendMessage = async (text: string) => {
         const userMessage: Message = {id: Date.now(), text, sender: "user"};
         setMessages((prev) => [...prev, userMessage]);
         setIsLoading(true);
 
-        setTimeout(() => {
+        try {
+            // APIリクエストを送信
+            const response = await fetch("http://localhost:3000/api/tool/search-track", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({query: text}),
+            });
+            console.log("API Response:", response);
+
+            if (!response.ok) {
+                throw new Error("APIからの応答がありません。");
+            }
+
+            const data = await response.json();
+
             const aiMessage: Message = {
                 id: Date.now() + 1,
-                text: `「${text}」についてのAIの返信です。`,
+                text: data.content[0].text,
                 sender: "ai",
             };
             setMessages((prev) => [...prev, aiMessage]);
+        } catch (error) {
+            console.error("メッセージの送信に失敗しました:", error);
+            const errorMessage: Message = {
+                id: Date.now() + 1,
+                text: "エラーが発生しました。もう一度お試しください。",
+                sender: "ai",
+            };
+            setMessages((prev) => [...prev, errorMessage]);
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
     };
 
     return (
