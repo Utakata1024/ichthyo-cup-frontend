@@ -70,97 +70,82 @@ export default function Home() {
     }
   }, [messages, isLoading]);
 
-  const handleSendMessage = async (text: string) => {
-    const userMessage: Message = {
-      id: Date.now(),
-      text,
-      sender: "user",
-      isAnimation: false,
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+    const handleSendMessage = async (text: string) => {
+        const userMessage: Message = {
+            id: Date.now(),
+            text,
+            sender: "user",
+            isAnimation: false,
+        };
+        setMessages((prev) => [...prev, userMessage]);
+        setIsLoading(true);
 
-    try {
-      // APIリクエストを送信
-      const response = await fetch(
-        "http://127.0.0.1:4000/api/tool/search-track",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ query: text }),
+        try {
+            // 1回目：classify
+            const classifyResponse = await fetch(
+                "http://127.0.0.1:4000/api/tool/classify-spotify-query",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: text }),
+                }
+            );
+            const classifyData = await classifyResponse.json();
+            const classifiedText = classifyData.content?.[0]?.text;
+            if (!classifiedText) throw new Error("分類結果がありません");
+
+            // 2回目：search
+            const searchResponse = await fetch(
+                "http://127.0.0.1:4000/api/tool/search-spotify",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ type: "track", keyword: classifiedText }),
+                }
+            );
+            const searchData = await searchResponse.json();
+
+            const aiText = searchData.content?.[0]?.text || "検索結果が見つかりません";
+            const aiMessage: Message = {
+                id: Date.now() + 1,
+                text: aiText,
+                sender: "ai",
+                isAnimation: true,
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+        } catch (error) {
+            console.error(error);
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: Date.now() + 1,
+                    text: "エラーが発生しました。もう一度お試しください。",
+                    sender: "ai",
+                    isAnimation: false,
+                },
+            ]);
+        } finally {
+            setIsLoading(false);
         }
-      );
-      console.log("API Response:", response);
+    };
 
-      if (!response.ok) {
-        throw new Error("APIからの応答がありません。");
-      }
-
-      const data = await response.json();
-      console.log(data);
-
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        text: data.content[0].text,
-        sender: "ai",
-        isAnimation: true,
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("メッセージの送信に失敗しました:", error);
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        text: "エラーが発生しました。もう一度お試しください。",
-        sender: "ai",
-        isAnimation: false,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // ログアウト処理
-const handleLogout = async () => {
-  try {
-    // サーバーのログアウトAPIを呼び出し (credentials: "include" を使用)
-    await fetch("http://127.0.0.1:4000/api/auth/logout", {
-      credentials: "include",
-    });
-
-    // ローカルストレージとコンポーネントの状態をクリア
-    localStorage.removeItem(CHAT_MESSAGES_KEY);
-    setMessages([]);
-
-    // ログインページにリダイレクト
-    router.push("/");
-  } catch (error) {
-    console.error("ログアウトに失敗しました:", error);
-  }
-};
-
-  return (
-    <div className="flex flex-col h-screen bg-gray-50 max-w-4xl mx-auto border-x border-gray-200">
-      <header className="p-4 bg-violet-800 border-b border-gray-200 shadow-sm flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-200 ">MusiChat</h1>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200"
-        >
-          ログアウト
-        </button>
-      </header>
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <ChatWindow
-          ref={chatContainerRef}
-          messages={messages}
-          isLoading={isLoading}
-          setMessages={setMessages}
-        />
-      </main>
-      <MessageInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-    </div>
-  );
+    return (
+        <div className="flex flex-col h-screen bg-gray-50 max-w-4xl mx-auto border-x border-gray-200">
+            <header className="p-4 bg-violet-800 border-b border-gray-200 shadow-sm text-center">
+                <h1 className="text-2xl font-bold text-gray-200">MusiChat</h1>
+            </header>
+            <main className="flex-1 flex flex-col overflow-hidden">
+                <ChatWindow
+                    ref={chatContainerRef}
+                    messages={messages}
+                    isLoading={isLoading}
+                    setMessages={setMessages}
+                />
+            </main>
+            <MessageInput
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+            />
+        </div>
+    );
 }
