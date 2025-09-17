@@ -85,7 +85,7 @@ export default function Home() {
         try {
             // APIリクエストを送信
             const response = await fetch(
-                "http://localhost:3000/api/tool/search-track",
+                "http://127.0.0.1:4000/api/tool/search-track",
                 {
                     method: "POST",
                     headers: {
