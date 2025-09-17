@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function CheckLogin() {
   const [me, setMe] = useState<any>(null);
@@ -19,7 +20,7 @@ export default function CheckLogin() {
       <h2>Logged in as:</h2>
       <p>{me.display_name}</p>
       <p>{me.email}</p>
-      <img src={me.images?.[0]?.url} alt="avatar" width={64} />
+      <Image src={me.images?.[0]?.url} alt="avatar" width={64} />
     </div>
   );
 }
