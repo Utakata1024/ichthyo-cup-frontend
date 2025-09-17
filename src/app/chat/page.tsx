@@ -94,13 +94,26 @@ export default function Home() {
             const classifiedText = classifyData.content?.[0]?.text;
             if (!classifiedText) throw new Error("分類結果がありません");
 
+            let parsed;
+            try {
+              parsed = JSON.parse(classifiedText); // ← JSON配列として解釈
+            } catch {
+              throw new Error("分類結果のJSONパースに失敗しました");
+            }
+    
+            // 1件目だけを利用（複数返る場合もある）
+            const first = parsed[0];
+            if (!first?.type || !first?.keyword) {
+              throw new Error("分類結果が不正です");
+            }
+            
             // 2回目：search
             const searchResponse = await fetch(
                 "http://127.0.0.1:4000/api/tool/search-spotify",
                 {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ type: "track", keyword: classifiedText }),
+                    body: JSON.stringify({ type: first.type, keyword: first.keyword }),
                 }
             );
             const searchData = await searchResponse.json();
