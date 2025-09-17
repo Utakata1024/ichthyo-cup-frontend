@@ -30,7 +30,9 @@ export default function CheckLogin() {
       <h2>Logged in as:</h2>
       <p>{me.display_name}</p>
       <p>{me.email}</p>
-      <Image src={me.images?.[0]?.url} alt="avatar" width={64} />
+      {me.images && me.images.length > 0 && (
+        <Image src={me.images[0].url} alt="avatar" width={64} height={64} />
+      )}
     </div>
   );
 }
