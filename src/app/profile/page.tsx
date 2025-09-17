@@ -2,8 +2,18 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+type ImageType = {
+  url: string;
+};
+
+type Me = {
+  display_name: string;
+  email: string;
+  images: ImageType[];
+};
+
 export default function CheckLogin() {
-  const [me, setMe] = useState<any>(null);
+  const [me, setMe] = useState<Me | null>(null);
 
   useEffect(() => {
     fetch("http://127.0.0.1:4000/api/me", {
